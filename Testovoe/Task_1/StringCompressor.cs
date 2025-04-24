@@ -1,9 +1,9 @@
 ﻿using System.Text;
 
 namespace Testovoe.Task_1;
-public static class Compression
+public static class StringCompressor
 {
-    public static string StringCompressor(string input)
+    public static string Compress(string input)
     {
         if (string.IsNullOrEmpty(input))
         {

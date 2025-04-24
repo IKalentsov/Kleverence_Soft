@@ -3,7 +3,7 @@ namespace TestProject;
 using Testovoe.Task_1;
 using Xunit;
 
-public class CompressionTests
+public class StringCompressorTests
 {
     [Theory]
     [InlineData("aaabbc", "a3b2c")]       // Базовый случай
@@ -17,7 +17,7 @@ public class CompressionTests
     public void StringCompressor_CompressesCorrectly(string input, string expected)
     {
         // Act
-        var result = Compression.StringCompressor(input);
+        var result = StringCompressor.Compress(input);
 
         // Assert
         Assert.Equal(expected, result);
@@ -30,7 +30,7 @@ public class CompressionTests
         string input = null;
 
         // Act
-        var result = Compression.StringCompressor(input);
+        var result = StringCompressor.Compress(input);
 
         // Assert
         Assert.Equal("", result);
@@ -43,7 +43,7 @@ public class CompressionTests
         string input = "aAAbBccC";
 
         // Act
-        var result = Compression.StringCompressor(input);
+        var result = StringCompressor.Compress(input);
 
         // Assert
         Assert.Equal("aA2bBc2C", result);
