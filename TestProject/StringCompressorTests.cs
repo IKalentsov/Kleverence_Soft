@@ -16,6 +16,7 @@ public class StringCompressorTests
     [InlineData("   ", " 3")]             // Пробелы (если нужно их учитывать)
     [InlineData("a", "a")]                // Один символ
     [InlineData("AaA", "AaA")]            // Разный регистр (если важно)
+    [InlineData("AaAbbAA", "AaAb2A2")]    // Случайный набор
     public void StringCompressor_CompressesCorrectly(string input, string expected)
     {
         // Act
@@ -64,6 +65,7 @@ public class StringCompressorTests
     [InlineData("a", "a")]                // Один символ
     [InlineData("AaA", "AaA")]            // Разный регистр (если важно)
     [InlineData(" 3", "   ")]             // Пробелы (если нужно их учитывать)
+    [InlineData("AaAb2A2", "AaAbbAA")]    // Случайный набор
     public void Decompress_ValidInput_ReturnsOriginalString(string compressed, string expected)
     {
         string result = StringCompressor.Decompress(compressed);
@@ -76,6 +78,15 @@ public class StringCompressorTests
     public void CompressDecompress_RoundTrip_ReturnsOriginalString()
     {
         string original = "aaabbbccdeeffgg";
+        string compressed = StringCompressor.Compress(original);
+        string decompressed = StringCompressor.Decompress(compressed);
+        Assert.Equal(original, decompressed);
+    }
+
+    [Fact]
+    public void CompressDecompressRandom_RoundTrip_ReturnsOriginalString()
+    {
+        string original = "AaAbbAA";
         string compressed = StringCompressor.Compress(original);
         string decompressed = StringCompressor.Decompress(compressed);
         Assert.Equal(original, decompressed);
