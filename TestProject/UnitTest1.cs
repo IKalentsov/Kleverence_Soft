@@ -5,6 +5,8 @@ using Xunit;
 
 public class StringCompressorTests
 {
+    #region Compress
+
     [Theory]
     [InlineData("aaabbc", "a3b2c")]       // Базовый случай
     [InlineData("abc", "abc")]            // Нет повторяющихся символов
@@ -13,7 +15,7 @@ public class StringCompressorTests
     [InlineData("", "")]                  // Пустая строка
     [InlineData("   ", " 3")]             // Пробелы (если нужно их учитывать)
     [InlineData("a", "a")]                // Один символ
-    [InlineData("AaA", "A2a")]            // Разный регистр (если важно)
+    [InlineData("AaA", "AaA")]            // Разный регистр (если важно)
     public void StringCompressor_CompressesCorrectly(string input, string expected)
     {
         // Act
@@ -47,5 +49,35 @@ public class StringCompressorTests
 
         // Assert
         Assert.Equal("aA2bBc2C", result);
+    }
+
+    #endregion
+
+    #region Decompress
+
+    [Theory]
+    [InlineData("a3b2c", "aaabbc")]       // Базовый случай
+    [InlineData("abc", "abc")]            // Без чисел
+    [InlineData("a2b3c2", "aabbbcc")]     // Несколько чисел
+    [InlineData("z4", "zzzz")]            // Одно число
+    [InlineData("", "")]                  // Пустая строка
+    [InlineData("a", "a")]                // Один символ
+    [InlineData("AaA", "AaA")]            // Разный регистр (если важно)
+    [InlineData(" 3", "   ")]             // Пробелы (если нужно их учитывать)
+    public void Decompress_ValidInput_ReturnsOriginalString(string compressed, string expected)
+    {
+        string result = StringCompressor.Decompress(compressed);
+        Assert.Equal(expected, result);
+    }
+
+    #endregion
+
+    [Fact]
+    public void CompressDecompress_RoundTrip_ReturnsOriginalString()
+    {
+        string original = "aaabbbccdeeffgg";
+        string compressed = StringCompressor.Compress(original);
+        string decompressed = StringCompressor.Decompress(compressed);
+        Assert.Equal(original, decompressed);
     }
 }

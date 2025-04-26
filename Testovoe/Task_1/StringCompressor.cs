@@ -3,46 +3,111 @@
 namespace Testovoe.Task_1;
 public static class StringCompressor
 {
+    /// <summary>
+    /// Принимает строку для компрессии
+    /// </summary>
+    /// <param name="input"></param>
+    /// <remarks>входная строка, подлежая компрессии</remarks>
+    /// <returns>сжатая строка</returns>
     public static string Compress(string input)
     {
         if (string.IsNullOrEmpty(input))
         {
-            return ""; // но сюда по-хорошему обработчик ошибок добавить чтобы не был null
+            return input ?? string.Empty; // но сюда по-хорошему обработчик ошибок добавить чтобы не был null
         }
 
-        IDictionary<char, int> letterCountDict = new Dictionary<char, int>(input.Length);
+        IList<(char Symbol, int Count)> charGroups = new List<(char, int)>();
 
-        foreach (var itemChar in input)
+        int currentCount = 0;
+        char prevChar = input[0];
+
+        foreach(char currentChar in input)
         {
-            if (letterCountDict.TryGetValue(itemChar, out int value))
+            if(currentChar == prevChar)
             {
-                letterCountDict[itemChar] = ++value;
+                // Продолжение последовательности
+                currentCount++;
                 continue;
             }
-
-            letterCountDict.Add(itemChar, 1);
+            
+            // Новая последовательность
+            charGroups.Add((prevChar, currentCount));
+            prevChar = currentChar;
+            currentCount = 1;
         }
 
-        return GetResult(letterCountDict);
+        // Добавляем последнюю последовательность
+        charGroups.Add((prevChar, currentCount));
+
+        // Собираем сжатую строку
+        var compressed = new StringBuilder();
+        foreach(var group in charGroups)
+        {
+            compressed.Append(group.Symbol);
+            if(group.Count > 1)
+                compressed.Append(group.Count);
+        }
+
+        return compressed.ToString();
     }
 
-    private static string GetResult(IDictionary<char, int> letterCountDict)
+    /// <summary>
+    /// Принимает строку для декомпрессии
+    /// </summary>
+    /// <param name="compressed"></param>
+    /// <remarks>входная строка, подлежая компрессии</remarks>
+    /// <returns>строка после декомпрессии</returns>
+    public static string Decompress(string compressed)
     {
-        var result = new StringBuilder(letterCountDict.Count);
+        if(string.IsNullOrEmpty(compressed))
+            return compressed;
 
-        foreach (var item in letterCountDict)
+        var charGroups = new List<(char Symbol, int Count)>();
+        char? currentChar = null;
+        var numberBuilder = new StringBuilder();
+
+        foreach(char c in compressed)
         {
-            if (item.Value == 1)
+            if(char.IsWhiteSpace(c) || char.IsLetterOrDigit(c))
             {
-                result.Append(item.Key);
+                if(currentChar.HasValue && (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)))
+                {
+                    if(char.IsDigit(c))
+                    {
+                        numberBuilder.Append(c);
+                    }
+                    else
+                    {
+                        AddCurrentGroup(charGroups, currentChar.Value, numberBuilder);
+                        currentChar = c;
+                    }
+                }
+                else
+                {
+                    AddCurrentGroup(charGroups, currentChar, numberBuilder);
+                    currentChar = c;
+                }
             }
-            else
-            {
-                result.Append(item.Key);
-                result.Append(item.Value);
-            }
+        }
+
+        AddCurrentGroup(charGroups, currentChar, numberBuilder);
+
+        var result = new StringBuilder();
+        foreach(var group in charGroups)
+        {
+            result.Append(group.Symbol, group.Count);
         }
 
         return result.ToString();
+    }
+
+    private static void AddCurrentGroup(List<(char, int)> charGroups, char? currentChar, StringBuilder numberBuilder)
+    {
+        if(currentChar.HasValue)
+        {
+            int count = numberBuilder.Length > 0 ? int.Parse(numberBuilder.ToString()) : 1;
+            charGroups.Add((currentChar.Value, count));
+            numberBuilder.Clear();
+        }
     }
 }
